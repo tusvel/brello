@@ -1,0 +1,42 @@
+name: Lint
+on:
+  pull_request:
+
+jobs:
+  check:
+    name: ‍💻 Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏬ Checkout
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Enable corepack
+        run: corepack enable
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          run_install: false
+
+      - name: 💾 Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: 📦 Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: 🔍 Install dependencies
+        run: pnpm install
+
+      - name: Lint js
+        run: pnpm lint:js
+
+      - name: Lint styles
+        run: pnpm lint:css
