@@ -1,91 +1,42 @@
-name: Checking CI
-
+name: Lint
 on:
   pull_request:
-  push:
-    branches:
-      - main
 
 jobs:
-  code:
-    name: Checking code
+  check:
+    name: ‍💻 Linting
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
+      - name: ⏬ Checkout
         uses: actions/checkout@v3
 
-      - name: Use node.js v18.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      - name: ⚙️ Enable corepack
+        run: corepack enable
 
-      - name: Enable corepack
-        uses: corepack enable
-
-      - name: Setup pnpm
+      - name: 📦 Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           run_install: false
 
-      - name: Get pnpm store directory
+      - name: 💾 Get pnpm store directory
         id: pnpm-cache
         shell: bash
         run: |
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
+      - name: 📦 Setup pnpm cache
+        uses: actions/cache@v3
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Install dependencies
+      - name: 🔍 Install dependencies
         run: pnpm install
 
-      - name: Check code
+      - name: Lint js
         run: pnpm lint:js
 
-  styles:
-    name: Checking style
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Use node.js v18.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Enable corepack
-        uses: corepack enable
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          run_install: false
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Check code
+      - name: Lint styles
         run: pnpm lint:css
-
